@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.graphics.Color
-import android.graphics.SurfaceTexture
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,14 +12,7 @@ import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ShapeFactory
 import com.google.ar.sceneform.rendering.MaterialFactory
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.view.SurfaceView
-import android.view.View.*
 import android.view.WindowManager
-import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.TransformableNode
@@ -33,9 +25,16 @@ class MainActivity : AppCompatActivity() {
 
     //lateinit var modelRenderable: ModelRenderable
 
+    //用紙
     lateinit var paperA4ModelRenderable: ModelRenderable
     lateinit var paperB5ModelRenderable: ModelRenderable
     lateinit var paperHagakiRenderable: ModelRenderable
+
+    //用紙のVector。多分取得方法あると思う。
+    lateinit var paperA4Vector3: Vector3
+    lateinit var paperB5Vector3: Vector3
+    lateinit var paperHagakiVector3: Vector3
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +52,8 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val attrib = window.attributes
-            attrib.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            attrib.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
 
         //それぞれ初期化
@@ -63,30 +63,39 @@ class MainActivity : AppCompatActivity() {
 
         arFragment.setOnTapArPlaneListener { hitResult, plane, motionEvent ->
 
-                //返す。
-                val model = when(ar_tablayout.selectedTabPosition){
-                    0->paperA4ModelRenderable
-                    1->paperB5ModelRenderable
-                    2->paperHagakiRenderable
-                    else->paperA4ModelRenderable
-                }
+            //返す。
+            val model = when (ar_tablayout.selectedTabPosition) {
+                0 -> paperA4ModelRenderable
+                1 -> paperB5ModelRenderable
+                2 -> paperHagakiRenderable
+                else -> paperA4ModelRenderable
+            }
+            val vector3 = when (ar_tablayout.selectedTabPosition) {
+                0 -> paperA4Vector3
+                1 -> paperB5Vector3
+                2 -> paperHagakiVector3
+                else -> paperA4Vector3
+            }
 
-                //初期化済みのとき、利用可能
-                // Create the Anchor.
-                val anchor = hitResult.createAnchor()
-                val anchorNode = AnchorNode(anchor)
-                anchorNode.setParent(arFragment.arSceneView.scene)
-                // Create the transformable andy and add it to the anchor.
-                val node = TransformableNode(arFragment.transformationSystem)
-                node.setParent(anchorNode)
-                node.renderable = model
-                node.select()
+            //初期化済みのとき、利用可能
+            // Create the Anchor.
+            val anchor = hitResult.createAnchor()
+            val anchorNode = AnchorNode(anchor)
+            anchorNode.setParent(arFragment.arSceneView.scene)
+            // Create the transformable andy and add it to the anchor.
+            val node = TransformableNode(arFragment.transformationSystem)
+            node.setParent(anchorNode)
+            node.scaleController.sensitivity = 0f   //感度を０にするとズームできなくなる？
+            node.renderable = model
+            node.select()
 
-                node.setOnTapListener { hitTestResult, motionEvent ->
-                    //削除するか？ボトムシートで
-                    val modelBottomFragment = ModelBottomFragment(node)
-                    modelBottomFragment.show(supportFragmentManager,"model_bottom")
-                }
+            node.setOnTapListener { hitTestResult, motionEvent ->
+                //削除するか？ボトムシートで
+                val modelBottomFragment =
+                    ModelBottomFragment(anchorNode, node, model, arFragment, vector3)
+                modelBottomFragment.show(supportFragmentManager, "model_bottom")
+            }
+
 
         }
 
@@ -96,6 +105,7 @@ class MainActivity : AppCompatActivity() {
     private fun initHagaki() {
         val height = 100f
         val width = 148f
+        paperHagakiVector3 = Vector3(height / 1000f, 0.05f, width / 1000f)
         // A4　用紙
         MaterialFactory.makeOpaqueWithColor(
             this,
@@ -103,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         ).thenAccept { material ->
             paperHagakiRenderable =
                 ShapeFactory.makeCube(
-                    Vector3(height / 1000f, 0.05f, width / 1000f),
+                    paperHagakiVector3,
                     Vector3.zero(),
                     material
                 )
@@ -114,6 +124,7 @@ class MainActivity : AppCompatActivity() {
     private fun initB5() {
         val height = 182f
         val width = 257f
+        paperB5Vector3 = Vector3(height / 1000f, 0.05f, width / 1000f)
         // A4　用紙
         MaterialFactory.makeOpaqueWithColor(
             this,
@@ -121,7 +132,7 @@ class MainActivity : AppCompatActivity() {
         ).thenAccept { material ->
             paperB5ModelRenderable =
                 ShapeFactory.makeCube(
-                    Vector3(height / 1000f, 0.05f, width / 1000f),
+                    paperB5Vector3,
                     Vector3.zero(),
                     material
                 )
@@ -132,6 +143,7 @@ class MainActivity : AppCompatActivity() {
     private fun initA4() {
         val height = 297f
         val width = 210f
+        paperA4Vector3 = Vector3(height / 1000f, 0.05f, width / 1000f)
         // A4　用紙
         MaterialFactory.makeOpaqueWithColor(
             this,
@@ -139,7 +151,7 @@ class MainActivity : AppCompatActivity() {
         ).thenAccept { material ->
             paperA4ModelRenderable =
                 ShapeFactory.makeCube(
-                    Vector3(height / 1000f, 0.05f, width / 1000f),
+                    paperA4Vector3,
                     Vector3.zero(),
                     material
                 )

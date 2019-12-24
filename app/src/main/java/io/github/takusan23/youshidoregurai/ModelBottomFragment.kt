@@ -4,14 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.ar.sceneform.FrameTime
+import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.math.Vector3
+import com.google.ar.sceneform.rendering.ModelRenderable
+import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
 import kotlinx.android.synthetic.main.bottomfragment_model.*
+import com.google.ar.sceneform.math.Quaternion
 
-class ModelBottomFragment(val model: TransformableNode) : BottomSheetDialogFragment() {
+
+class ModelBottomFragment(
+    val anchor: AnchorNode,
+    val node: TransformableNode,
+    val model: ModelRenderable,
+    val arFragment: ArFragment,
+    val vector3: Vector3
+) : BottomSheetDialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,7 +37,8 @@ class ModelBottomFragment(val model: TransformableNode) : BottomSheetDialogFragm
 
         //削除
         bottom_fragment_model_delete_button.setOnClickListener {
-            model.isEnabled = false
+            node.isEnabled = false
         }
+
     }
 }

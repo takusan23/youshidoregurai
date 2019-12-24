@@ -11,4 +11,18 @@
         android:layout_margin="10sp"
         android:text="削除" />
 
+    <Button
+        android:id="@+id/bottom_fragment_model_scale_add_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:text="回転＋" />
+
+    <Button
+        android:id="@+id/bottom_fragment_model_scale_minus_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:text="回転＋" />
+
 </LinearLayout>
