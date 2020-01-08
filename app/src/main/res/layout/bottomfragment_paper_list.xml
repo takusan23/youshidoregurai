@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/bottom_fragment_list_add_button"
         android:layout_margin="10sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

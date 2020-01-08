@@ -19,6 +19,7 @@ import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.TransformableNode
 import io.github.takusan23.youshidoregurai.BottomFragment.EditPaperBottomFragment
+import io.github.takusan23.youshidoregurai.BottomFragment.PaperListBottomFragment
 import io.github.takusan23.youshidoregurai.SQLiteHelper.PaperSQLiteHelper
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -103,7 +104,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         ar_paper_add_button.setOnClickListener {
-
+            val paperListBottomFragment = PaperListBottomFragment()
+            paperListBottomFragment.show(supportFragmentManager, "list")
         }
 
     }
@@ -151,6 +153,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         ar_tablayout.addTab(item)
                     }
+                    query.moveToNext()
                 }
             } else {
                 //初回起動時。A4 B5 はがき を生成する。
