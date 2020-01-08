@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.os.Build
@@ -106,6 +107,11 @@ class MainActivity : AppCompatActivity() {
         ar_paper_add_button.setOnClickListener {
             val paperListBottomFragment = PaperListBottomFragment()
             paperListBottomFragment.show(supportFragmentManager, "list")
+        }
+
+        ar_setting_button.setOnClickListener {
+            val intent = Intent(this, LicenseActivity::class.java)
+            startActivity(intent)
         }
 
     }

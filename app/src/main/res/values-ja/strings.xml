@@ -6,4 +6,5 @@
     <string name="edit_paper_width">横（単位：センチメートル）</string>
     <string name="add">追加</string>
     <string name="paper_name">用紙の名前</string>
+    <string name="license">ライセンス</string>
 </resources>

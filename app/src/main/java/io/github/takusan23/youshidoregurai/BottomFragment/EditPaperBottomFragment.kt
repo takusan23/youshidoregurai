@@ -13,7 +13,7 @@ import io.github.takusan23.youshidoregurai.R
 import io.github.takusan23.youshidoregurai.SQLiteHelper.PaperSQLiteHelper
 import kotlinx.android.synthetic.main.bottomfragment_edit_paper.*
 
-class EditPaperBottomFragment :BottomSheetDialogFragment(){
+class EditPaperBottomFragment(val name: String = "") : BottomSheetDialogFragment() {
 
     lateinit var paperSQLiteHelper: PaperSQLiteHelper
     lateinit var sqLiteDatabase: SQLiteDatabase
@@ -23,7 +23,7 @@ class EditPaperBottomFragment :BottomSheetDialogFragment(){
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.bottomfragment_edit_paper,container,false)
+        return inflater.inflate(R.layout.bottomfragment_edit_paper, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,16 +41,35 @@ class EditPaperBottomFragment :BottomSheetDialogFragment(){
             //追加
             val contentValues = ContentValues()
             contentValues.apply {
-                put("name",name)
-                put("height",height)
-                put("width",width)
-                put("setting","")
+                put("name", name)
+                put("height", height)
+                put("width", width)
+                put("setting", "")
             }
-            sqLiteDatabase.insert(PaperSQLiteHelper.TABLE_NAME,null,contentValues)
-            if(activity is MainActivity){
+            sqLiteDatabase.insert(PaperSQLiteHelper.TABLE_NAME, null, contentValues)
+            if (activity is MainActivity) {
                 //再読み込み
                 (activity as MainActivity).loadDB()
             }
+        }
+
+        if (name.isNotEmpty()) {
+            val query = sqLiteDatabase.query(
+                PaperSQLiteHelper.TABLE_NAME,
+                arrayOf("name", "height", "width"),
+                "name=?",
+                arrayOf(name),
+                null,
+                null,
+                null
+            )
+            query.moveToFirst()
+            val name = query.getString(0)
+            val height = query.getInt(1)
+            val width = query.getInt(2)
+            bottomfragment_edit_paper_name.setText(name)
+            bottomfragment_edit_paper_height.setText(height)
+            bottomfragment_edit_paper_width.setText(width)
         }
 
 

@@ -5,4 +5,5 @@
     <string name="edit_paper_height">Height (cm)</string>
     <string name="add">Add</string>
     <string name="paper_name">Name</string>
+    <string name="license">License</string>
 </resources>
