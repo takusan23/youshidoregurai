@@ -2,7 +2,9 @@ package io.github.takusan23.youshidoregurai
 
 import android.app.Activity
 import android.app.ActivityManager
+import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +18,8 @@ import android.view.WindowManager
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.TransformableNode
+import io.github.takusan23.youshidoregurai.BottomFragment.EditPaperBottomFragment
+import io.github.takusan23.youshidoregurai.SQLiteHelper.PaperSQLiteHelper
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -35,6 +39,13 @@ class MainActivity : AppCompatActivity() {
     lateinit var paperB5Vector3: Vector3
     lateinit var paperHagakiVector3: Vector3
 
+    //データベース
+    lateinit var paperSQLiteHelper: PaperSQLiteHelper
+    lateinit var sqLiteDatabase: SQLiteDatabase
+
+    //データベースの値から作った物体配列
+    val renderableList = arrayListOf<ModelRenderable>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +54,11 @@ class MainActivity : AppCompatActivity() {
             return
         }
         setContentView(R.layout.activity_main)
+
+        //DB初期化
+        initDB()
+        //よみこみ
+        loadDB()
 
         //ArFragment取得
         arFragment = supportFragmentManager.findFragmentById(R.id.ar_fragment) as ArFragment
@@ -57,25 +73,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         //それぞれ初期化
-        initA4()
-        initB5()
-        initHagaki()
+        //  initA4()
+        //  initB5()
+        //  initHagaki()
 
         arFragment.setOnTapArPlaneListener { hitResult, plane, motionEvent ->
 
-            //返す。
-            val model = when (ar_tablayout.selectedTabPosition) {
-                0 -> paperA4ModelRenderable
-                1 -> paperB5ModelRenderable
-                2 -> paperHagakiRenderable
-                else -> paperA4ModelRenderable
-            }
-            val vector3 = when (ar_tablayout.selectedTabPosition) {
-                0 -> paperA4Vector3
-                1 -> paperB5Vector3
-                2 -> paperHagakiVector3
-                else -> paperA4Vector3
-            }
+            //モデル取得
+            val tag = ar_tablayout.getTabAt(ar_tablayout.selectedTabPosition)?.tag as Int
+            val model = renderableList[tag]
 
             //初期化済みのとき、利用可能
             // Create the Anchor.
@@ -91,71 +97,116 @@ class MainActivity : AppCompatActivity() {
 
             node.setOnTapListener { hitTestResult, motionEvent ->
                 //削除するか？ボトムシートで
-                val modelBottomFragment =
-                    ModelBottomFragment(anchorNode, node, model, arFragment, vector3)
+                val modelBottomFragment = ModelBottomFragment(node)
                 modelBottomFragment.show(supportFragmentManager, "model_bottom")
             }
+        }
 
+        ar_paper_add_button.setOnClickListener {
 
         }
 
+    }
+
+    private fun initDB() {
+        paperSQLiteHelper = PaperSQLiteHelper(this)
+        sqLiteDatabase = paperSQLiteHelper.writableDatabase
+        paperSQLiteHelper.setWriteAheadLoggingEnabled(false) //先読み？高速化無効。
+    }
+
+    fun loadDB() {
+        ar_tablayout.removeAllTabs()
+        renderableList.clear()
+        if (::sqLiteDatabase.isInitialized) {
+            val query = sqLiteDatabase.query(
+                PaperSQLiteHelper.TABLE_NAME,
+                arrayOf("name", "height", "width"),
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+            //0だったら動かないように
+            if (query.count != 0) {
+                query.moveToFirst()
+                for (i in 0 until query.count) {
+                    //取得
+                    val name = query.getString(0)
+                    val height = query.getInt(1)
+                    val width = query.getInt(2)
+                    //生成
+                    val vector = Vector3(height / 1000f, 0.05f, width / 1000f)
+                    MaterialFactory.makeOpaqueWithColor(
+                        this,
+                        com.google.ar.sceneform.rendering.Color(Color.BLUE)
+                    ).thenAccept { material ->
+                        val renderable = ShapeFactory.makeCube(vector, Vector3.zero(), material)
+                        renderableList.add(renderable)
+                        //TabItem作成
+                        val item = ar_tablayout.newTab()
+                        item.apply {
+                            text = name
+                            tag = (renderableList.size - 1)//配列の位置など
+                        }
+                        ar_tablayout.addTab(item)
+                    }
+                }
+            } else {
+                //初回起動時。A4 B5 はがき を生成する。
+                initDBHagaki()
+                initDBA4()
+                initDBB5()
+                //再読み込み
+                loadDB()
+            }
+            query.close()
+        }
     }
 
     //はがき
-    private fun initHagaki() {
-        val height = 100f
-        val width = 148f
-        paperHagakiVector3 = Vector3(height / 1000f, 0.05f, width / 1000f)
-        // A4　用紙
-        MaterialFactory.makeOpaqueWithColor(
-            this,
-            com.google.ar.sceneform.rendering.Color(Color.GREEN)
-        ).thenAccept { material ->
-            paperHagakiRenderable =
-                ShapeFactory.makeCube(
-                    paperHagakiVector3,
-                    Vector3.zero(),
-                    material
-                )
+    private fun initDBHagaki() {
+        val height = 100
+        val width = 148
+        val name = "はがき"
+        val contentValues = ContentValues()
+        contentValues.apply {
+            put("name", name)
+            put("height", height)
+            put("width", width)
+            put("setting", "")
         }
+        sqLiteDatabase.insert(PaperSQLiteHelper.TABLE_NAME, null, contentValues)
     }
 
     //B5用紙
-    private fun initB5() {
-        val height = 182f
-        val width = 257f
-        paperB5Vector3 = Vector3(height / 1000f, 0.05f, width / 1000f)
-        // A4　用紙
-        MaterialFactory.makeOpaqueWithColor(
-            this,
-            com.google.ar.sceneform.rendering.Color(Color.BLUE)
-        ).thenAccept { material ->
-            paperB5ModelRenderable =
-                ShapeFactory.makeCube(
-                    paperB5Vector3,
-                    Vector3.zero(),
-                    material
-                )
+    private fun initDBB5() {
+        val height = 182
+        val width = 257
+        val name = "B5"
+        val contentValues = ContentValues()
+        contentValues.apply {
+            put("name", name)
+            put("height", height)
+            put("width", width)
+            put("setting", "")
         }
+        sqLiteDatabase.insert(PaperSQLiteHelper.TABLE_NAME, null, contentValues)
     }
 
     //A4用紙
-    private fun initA4() {
-        val height = 297f
-        val width = 210f
-        paperA4Vector3 = Vector3(height / 1000f, 0.05f, width / 1000f)
-        // A4　用紙
-        MaterialFactory.makeOpaqueWithColor(
-            this,
-            com.google.ar.sceneform.rendering.Color(Color.RED)
-        ).thenAccept { material ->
-            paperA4ModelRenderable =
-                ShapeFactory.makeCube(
-                    paperA4Vector3,
-                    Vector3.zero(),
-                    material
-                )
+    private fun initDBA4() {
+        val height = 297
+        val width = 210
+        val name = "A4"
+        val contentValues = ContentValues()
+        contentValues.apply {
+            put("name", name)
+            put("height", height)
+            put("width", width)
+            put("setting", "")
         }
+        sqLiteDatabase.insert(PaperSQLiteHelper.TABLE_NAME, null, contentValues)
     }
 
     fun checkIsSupportedDeviceOrFinish(activity: Activity): Boolean {
