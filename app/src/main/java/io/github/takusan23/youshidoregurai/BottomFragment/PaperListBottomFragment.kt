@@ -87,6 +87,7 @@ class PaperListBottomFragment : BottomSheetDialogFragment() {
         bottom_fragment_list_recyclerview.layoutManager =
             mLayoutManager as RecyclerView.LayoutManager?
         paperListAdapter = PaperListAdapter(paperList)
+        paperListAdapter.mainActivity = activity as MainActivity
         paperListAdapter.sqLiteDatabase = sqLiteDatabase
         bottom_fragment_list_recyclerview.adapter = paperListAdapter
 

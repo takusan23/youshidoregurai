@@ -1,9 +1,10 @@
 <resources>
     <string name="app_name">youshidoregurai</string>
     <string name="delete">Delete</string>
-    <string name="edit_paper_width">Width (cm)</string>
-    <string name="edit_paper_height">Height (cm)</string>
+    <string name="edit_paper_width">Width (mm)</string>
+    <string name="edit_paper_height">Height (mm)</string>
     <string name="add">Add</string>
     <string name="paper_name">Name</string>
     <string name="license">License</string>
+    <string name="change">Change</string>
 </resources>

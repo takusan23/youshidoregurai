@@ -18,6 +18,9 @@ class EditPaperBottomFragment(val name: String = "") : BottomSheetDialogFragment
     lateinit var paperSQLiteHelper: PaperSQLiteHelper
     lateinit var sqLiteDatabase: SQLiteDatabase
 
+    //更新の場合
+    var isUpdate = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -46,11 +49,23 @@ class EditPaperBottomFragment(val name: String = "") : BottomSheetDialogFragment
                 put("width", width)
                 put("setting", "")
             }
-            sqLiteDatabase.insert(PaperSQLiteHelper.TABLE_NAME, null, contentValues)
+            //追加 or アップデート
+            if (isUpdate) {
+                //同じ名前に上書き
+                sqLiteDatabase.update(
+                    PaperSQLiteHelper.TABLE_NAME,
+                    contentValues,
+                    "name=?",
+                    arrayOf(name)
+                )
+            } else {
+                sqLiteDatabase.insert(PaperSQLiteHelper.TABLE_NAME, null, contentValues)
+            }
             if (activity is MainActivity) {
                 //再読み込み
                 (activity as MainActivity).loadDB()
             }
+            dismiss()
         }
 
         if (name.isNotEmpty()) {
@@ -68,11 +83,12 @@ class EditPaperBottomFragment(val name: String = "") : BottomSheetDialogFragment
             val height = query.getInt(1)
             val width = query.getInt(2)
             bottomfragment_edit_paper_name.setText(name)
-            bottomfragment_edit_paper_height.setText(height)
-            bottomfragment_edit_paper_width.setText(width)
+            bottomfragment_edit_paper_height.setText(height.toString())
+            bottomfragment_edit_paper_width.setText(width.toString())
+            query.close()
+            isUpdate = true
+            bottomfragment_edit_paper_add_button.text = getString(R.string.change)
         }
-
-
     }
 
     private fun initDB() {

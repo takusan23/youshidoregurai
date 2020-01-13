@@ -29,6 +29,7 @@ class ModelBottomFragment(
         //削除
         bottom_fragment_model_delete_button.setOnClickListener {
             node.isEnabled = false
+            dismiss()
         }
 
     }

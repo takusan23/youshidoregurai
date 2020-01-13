@@ -144,7 +144,7 @@ class MainActivity : AppCompatActivity() {
                     val height = query.getInt(1)
                     val width = query.getInt(2)
                     //生成
-                    val vector = Vector3(height / 1000f, 0.05f, width / 1000f)
+                    val vector = Vector3(height / 1000f, 0.01f, width / 1000f)
                     MaterialFactory.makeOpaqueWithColor(
                         this,
                         com.google.ar.sceneform.rendering.Color(Color.BLUE)
