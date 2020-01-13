@@ -55,6 +55,7 @@ class PaperListAdapter(private val arrayListArrayAdapter: ArrayList<ArrayList<St
             if (::sqLiteDatabase.isInitialized) {
                 mainActivity.supportFragmentManager.let { it1 ->
                     val editPaperBottomFragment = EditPaperBottomFragment(name)
+                    editPaperBottomFragment.paperListBottomFragment = paperListBottomFragment
                     editPaperBottomFragment.show(it1, "edit")
                 }
             }
