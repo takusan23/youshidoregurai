@@ -150,6 +150,7 @@ class MainActivity : AppCompatActivity() {
                         com.google.ar.sceneform.rendering.Color(Color.BLUE)
                     ).thenAccept { material ->
                         val renderable = ShapeFactory.makeCube(vector, Vector3.zero(), material)
+
                         renderableList.add(renderable)
                         //TabItem作成
                         val item = ar_tablayout.newTab()
