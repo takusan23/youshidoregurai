@@ -16,6 +16,7 @@ class PaperListAdapter(private val arrayListArrayAdapter: ArrayList<ArrayList<St
     RecyclerView.Adapter<PaperListAdapter.ViewHolder>() {
 
     lateinit var mainActivity: MainActivity
+    lateinit var paperListBottomFragment: PaperListBottomFragment
     lateinit var sqLiteDatabase: SQLiteDatabase
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -44,14 +45,13 @@ class PaperListAdapter(private val arrayListArrayAdapter: ArrayList<ArrayList<St
             if (::sqLiteDatabase.isInitialized) {
                 sqLiteDatabase.delete(PaperSQLiteHelper.TABLE_NAME, "name=?", arrayOf(name))
                 //DB更新
-                if (context is MainActivity) {
-                    context.loadDB()
-                    (context.supportFragmentManager.findFragmentByTag("list") as PaperListBottomFragment).loadDB()
-                }
+                mainActivity.loadDB()
+                paperListBottomFragment.loadDB()
             }
         }
 
         holder.editButton.setOnClickListener {
+            //編集画面
             if (::sqLiteDatabase.isInitialized) {
                 mainActivity.supportFragmentManager.let { it1 ->
                     val editPaperBottomFragment = EditPaperBottomFragment(name)

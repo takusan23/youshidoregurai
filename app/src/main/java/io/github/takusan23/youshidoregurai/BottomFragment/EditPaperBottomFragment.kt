@@ -17,6 +17,7 @@ class EditPaperBottomFragment(val name: String = "") : BottomSheetDialogFragment
 
     lateinit var paperSQLiteHelper: PaperSQLiteHelper
     lateinit var sqLiteDatabase: SQLiteDatabase
+    lateinit var paperListBottomFragment: PaperListBottomFragment
 
     //更新の場合
     var isUpdate = false
@@ -66,6 +67,7 @@ class EditPaperBottomFragment(val name: String = "") : BottomSheetDialogFragment
                 (activity as MainActivity).loadDB()
             }
             dismiss()
+            paperListBottomFragment.loadDB()
         }
 
         if (name.isNotEmpty()) {

@@ -139,6 +139,7 @@ class MainActivity : AppCompatActivity() {
             if (query.count != 0) {
                 query.moveToFirst()
                 for (i in 0 until query.count) {
+                    println("こうしｎ")
                     //取得
                     val name = query.getString(0)
                     val height = query.getInt(1)

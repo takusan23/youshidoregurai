@@ -47,6 +47,7 @@ class PaperListBottomFragment : BottomSheetDialogFragment() {
         //追加画面へ...
         bottom_fragment_list_add_button.setOnClickListener {
             val editPaperBottomFragment = EditPaperBottomFragment()
+            editPaperBottomFragment.paperListBottomFragment = this
             fragmentManager?.let { it1 -> editPaperBottomFragment.show(it1, "edit") }
         }
 
@@ -89,6 +90,7 @@ class PaperListBottomFragment : BottomSheetDialogFragment() {
         paperListAdapter = PaperListAdapter(paperList)
         paperListAdapter.mainActivity = activity as MainActivity
         paperListAdapter.sqLiteDatabase = sqLiteDatabase
+        paperListAdapter.paperListBottomFragment = this
         bottom_fragment_list_recyclerview.adapter = paperListAdapter
 
         val simpleItemTouchHelper =
